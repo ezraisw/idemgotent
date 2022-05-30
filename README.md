@@ -2,7 +2,7 @@
 
 Middleware for providing idempotency for APIs.
 
-Uses [WraCha](https://github.com/pwnedgod/wracha) as its base.
+Uses [WraCha](https://github.com/pwnedgod/wracha) as its base. Safe for multi-threaded/multi-instance use.
 
 ## Installation
 
