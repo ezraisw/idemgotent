@@ -107,7 +107,7 @@ func (m idempotencyMiddleware) middleware(next http.Handler) http.Handler {
 			wracha.KeyableStr(key),
 
 			// Will be executed only once for each key.
-			m.makeAction(func(nw http.ResponseWriter) { next.ServeHTTP(nw, r); fromCache = false }),
+			m.makeAction(func(nw http.ResponseWriter) { fromCache = false; next.ServeHTTP(nw, r) }),
 		)
 		if err != nil {
 			m.logger.Debug("error returned by actor", err)

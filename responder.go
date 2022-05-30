@@ -86,17 +86,17 @@ func (cachedResponder) CacheBody() bool {
 }
 
 func (rp cachedResponder) Respond(w http.ResponseWriter, r *http.Request, cr CacheResult) {
+	if !cr.FromCache || rp.wildcard {
+		cr.CopyHeaderTo(w, nil)
+	} else if len(rp.allowedHeaderNames) > 0 {
+		cr.CopyHeaderTo(w, func(name string, _ []string) bool { return util.Contains(rp.allowedHeaderNames, name) })
+	}
+
 	// Should it never be set, http.ResponseWriter will automatically set status code to 200 on first write.
 	if !cr.FromCache {
 		w.WriteHeader(cr.Response.GetStatusCode())
 	} else if rp.overrideStatusCode != 0 {
 		w.WriteHeader(rp.overrideStatusCode)
-	}
-
-	if !cr.FromCache || rp.wildcard {
-		cr.CopyHeaderTo(w, nil)
-	} else if len(rp.allowedHeaderNames) > 0 {
-		cr.CopyHeaderTo(w, func(name string, _ []string) bool { return util.Contains(rp.allowedHeaderNames, name) })
 	}
 
 	w.Write(cr.Response.GetBody())

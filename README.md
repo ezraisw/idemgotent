@@ -133,8 +133,8 @@ func (rp conflictResponder) Respond(w http.ResponseWriter, r *http.Request, cr C
         return
     }
 
-    w.WriteHeader(cr.Response.GetStatusCode())
     cr.CopyHeaderTo(w, nil)
+    w.WriteHeader(cr.Response.GetStatusCode())
     w.Write(cr.Response.GetBody())
 }
 ```
