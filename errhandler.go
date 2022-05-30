@@ -9,6 +9,10 @@ type (
 	ErrHandler func(error, http.ResponseWriter, *http.Request)
 )
 
+const (
+	ContentTypeJSON = "application/json"
+)
+
 func JSONErrHandler(statusCode int) ErrHandler {
 	return func(err error, w http.ResponseWriter, r *http.Request) {
 		// Should never return an error.
@@ -16,6 +20,7 @@ func JSONErrHandler(statusCode int) ErrHandler {
 			"message": err.Error(),
 		})
 
+		w.Header().Set("Content-Type", ContentTypeJSON)
 		w.WriteHeader(statusCode)
 		w.Write(body)
 	}
