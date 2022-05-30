@@ -19,41 +19,41 @@ go get github.com/pwnedgod/idemgotent
 package main
 
 import (
-	"net/http"
+    "net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/go-redis/redis/v8"
-	"github.com/pwnedgod/idemgotent"
-	"github.com/pwnedgod/wracha/adapter/goredis"
-	"github.com/pwnedgod/wracha/logger/std"
+    "github.com/go-chi/chi"
+    "github.com/go-redis/redis/v8"
+    "github.com/pwnedgod/idemgotent"
+    "github.com/pwnedgod/wracha/adapter/goredis"
+    "github.com/pwnedgod/wracha/logger/std"
 )
 
 func main() {
-	// ... your router (example with go-chi)
-	r := chi.NewRouter()
+    // ... your router (example with go-chi)
+    r := chi.NewRouter()
 
-	// ... your redis client
-	client := redis.NewClient(&redis.Options{
-		// ...
-	})
+    // ... your redis client
+    client := redis.NewClient(&redis.Options{
+        // ...
+    })
 
-	middleware := idemgotent.Middleware("/your/path/to/route",
-		idemgotent.WithAdapter(goredis.NewAdapter(client)),
-		idemgotent.WithLogger(std.NewLogger()),
-	)
+    middleware := idemgotent.Middleware("/your/path/to/route",
+        idemgotent.WithAdapter(goredis.NewAdapter(client)),
+        idemgotent.WithLogger(std.NewLogger()),
+    )
 
-	// ... (example 1 with go-chi)
-	r.Group(func(r chi.Router) {
-		r.Use(middleware)
-		r.Post("/your/path/to/route", myHandler)
-	})
+    // ... (example 1 with go-chi)
+    r.Group(func(r chi.Router) {
+        r.Use(middleware)
+        r.Post("/your/path/to/route", myHandler)
+    })
 
-	// ... (example 2 with go-chi)
-	r.With(middleware).Post("/your/path/to/route", myHandler)
+    // ... (example 2 with go-chi)
+    r.With(middleware).Post("/your/path/to/route", myHandler)
 }
 
 func myHandler(w http.ResponseWriter, r *http.Request) {
-	// ...
+    // ...
 }
 ```
 
@@ -81,9 +81,9 @@ type KeySource func(r *http.Request) (string, error)
 
 ```go
 func JSONKeySource(name string) idemgotent.KeySource {
-	return func(r *http.Request) (string, error) {
-		// ... unmarshal and read JSON.
-	}
+    return func(r *http.Request) (string, error) {
+        // ... unmarshal and read JSON.
+    }
 }
 ```
 
@@ -102,10 +102,10 @@ You can also implement your own responder.
 
 ```go
 type Responder interface {
-	CacheStatusCode() bool
-	CacheHeader() bool
-	CacheBody() bool
-	Respond(http.ResponseWriter, *http.Request, CacheResult)
+    CacheStatusCode() bool
+    CacheHeader() bool
+    CacheBody() bool
+    Respond(http.ResponseWriter, *http.Request, CacheResult)
 }
 ```
 
@@ -114,27 +114,27 @@ type conflictResponder struct {
 }
 
 func (conflictResponder) CacheStatusCode() bool {
-	return false
+    return false
 }
 
 func (conflictResponder) CacheHeader() bool {
-	return false
+    return false
 }
 
 func (conflictResponder) CacheBody() bool {
-	return false
+    return false
 }
 
 func (rp conflictResponder) Respond(w http.ResponseWriter, r *http.Request, cr CacheResult) {
-	if cr.FromCache {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusConflict)
-		w.Write([]byte("{\"message\": \"idempotency violation\"}"))
-		return
-	}
+    if cr.FromCache {
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusConflict)
+        w.Write([]byte("{\"message\": \"idempotency violation\"}"))
+        return
+    }
 
-	w.WriteHeader(cr.Response.GetStatusCode())
-	cr.CopyHeaderTo(w, nil)
-	w.Write(cr.Response.GetBody())
+    w.WriteHeader(cr.Response.GetStatusCode())
+    cr.CopyHeaderTo(w, nil)
+    w.Write(cr.Response.GetBody())
 }
 ```
