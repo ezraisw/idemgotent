@@ -10,17 +10,21 @@ type (
 )
 
 const (
+	HeaderContentType = "Content-Type"
+
 	ContentTypeJSON = "application/json"
+
+	KeyMessage = "message"
 )
 
 func JSONErrHandler(statusCode int) ErrHandler {
 	return func(err error, w http.ResponseWriter, r *http.Request) {
 		// Should never return an error.
 		body, _ := json.Marshal(map[string]any{
-			"message": err.Error(),
+			KeyMessage: err.Error(),
 		})
 
-		w.Header().Set("Content-Type", ContentTypeJSON)
+		w.Header().Set(HeaderContentType, ContentTypeJSON)
 		w.WriteHeader(statusCode)
 		w.Write(body)
 	}
