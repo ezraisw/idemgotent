@@ -28,7 +28,7 @@ type (
 		responder        Responder
 
 		// Initialized.
-		actor wracha.Actor[SerializableResponse]
+		actor wracha.Actor[serializableResponse]
 	}
 )
 
@@ -44,7 +44,7 @@ var (
 		WithKeySource(HeaderKeySource(HeaderIdempotencyKey)),
 		WithClientErrHandler(JSONErrHandler(http.StatusBadRequest)),
 		WithServerErrHandler(JSONErrHandler(http.StatusInternalServerError)),
-		WithResponder(RespondCached(0, "*")),
+		WithResponder(CachedResponder(0, "*")),
 	}
 )
 
@@ -74,7 +74,7 @@ func (m *idempotencyMiddleware) initActor() {
 		Codec: msgpack.NewCodec(),
 	}
 
-	m.actor = wracha.NewActor[SerializableResponse](ActorNamePrefix+m.name, actorOptions).
+	m.actor = wracha.NewActor[serializableResponse](ActorNamePrefix+m.name, actorOptions).
 		SetTTL(m.ttl)
 }
 
@@ -91,7 +91,7 @@ func (m idempotencyMiddleware) middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// Do not attempt to cache with empty keys. Immediately do the next in chain.
+		// Do not attempt to cache with empty keys. Skip to the next in chain.
 		if key == "" {
 			m.logger.Debug("request has no key")
 
@@ -99,15 +99,15 @@ func (m idempotencyMiddleware) middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// Will be true if the action is executed.
-		run := false
+		// Will be false if the action is executed.
+		fromCache := true
 
 		resp, err := m.actor.Do(
 			r.Context(),
 			wracha.KeyableStr(key),
 
 			// Will be executed only once for each key.
-			m.makeAction(func(nw http.ResponseWriter) { next.ServeHTTP(nw, r); run = true }),
+			m.makeAction(func(nw http.ResponseWriter) { next.ServeHTTP(nw, r); fromCache = false }),
 		)
 		if err != nil {
 			m.logger.Debug("error returned by actor", err)
@@ -116,25 +116,28 @@ func (m idempotencyMiddleware) middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		fromCache := !run
-
 		m.logger.Debug("responding from cache", fromCache)
-		m.responder(w, r, CacheResult{FromCache: fromCache, Response: resp})
+		m.responder.Respond(w, r, CacheResult{FromCache: fromCache, Response: resp})
 	})
 }
 
-func (m idempotencyMiddleware) makeAction(nextWriteTo func(http.ResponseWriter)) wracha.ActionFunc[SerializableResponse] {
-	return func(ctx context.Context) (wracha.ActionResult[SerializableResponse], error) {
+func (m idempotencyMiddleware) makeAction(nextWriteTo func(http.ResponseWriter)) wracha.ActionFunc[serializableResponse] {
+	return func(ctx context.Context) (wracha.ActionResult[serializableResponse], error) {
 		// Capture the response by substituting http.ResponseWriter with a custom one.
 		bw := response.NewBufferedResponseWriter()
 		nextWriteTo(bw)
 
-		resp := SerializableResponse{
-			StatusCode: bw.StatusCode(),
-			Header:     bw.Header(),
-			Body:       bw.Body(),
-		}
-
-		return wracha.ActionResult[SerializableResponse]{Cache: true, Value: resp}, nil
+		return wracha.ActionResult[serializableResponse]{Cache: true, Value: m.makeSerializableResponse(bw)}, nil
 	}
+}
+
+func (m idempotencyMiddleware) makeSerializableResponse(bw *response.BufferedResponseWriter) serializableResponse {
+	var resp serializableResponse
+
+	// To reduce cache size.
+	resp.setStatusCode(bw.StatusCode(), m.responder.CacheStatusCode())
+	resp.setHeader(bw.Header(), m.responder.CacheHeader())
+	resp.setBody(bw.Body(), m.responder.CacheBody())
+
+	return resp
 }
