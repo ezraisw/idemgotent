@@ -64,7 +64,13 @@ By design, this library is meant to be configurable and modular at certain parts
 #### Determining Key
 
 By default, the library uses the value of the header `Idempotency-Key` for determining idempotency.
-You can configure this by passing a `idemgotent.WithKeySource(idemgotent.HeaderKeySource("Custom-Idempotent-Key"))` to the options argument.
+You can configure this by passing
+
+```go
+idemgotent.WithKeySource(idemgotent.HeaderKeySource("Custom-Idempotent-Key"))
+```
+
+to the options argument.
 
 Alternatively, you can also define your own way to obtain the key by satisfying the `KeySource` function type.
 Be careful when obtaining idempotency keys from body as you might have to do some workarounds to allow multiple reads of the request body.
@@ -84,7 +90,13 @@ func JSONKeySource(name string) idemgotent.KeySource {
 #### Responding to Clients
 
 By default, the library responds with the previously cached response along with its status code and headers.
-This is override-able by passing `idemgoteng.WithResponder(idemgotent.CachedResponder(http.StatusNotModified, "Content-Type"))` to the options argument.
+This is override-able by passing
+
+```go
+idemgotent.WithResponder(idemgotent.CachedResponder(http.StatusNotModified, "Content-Type"))
+```
+
+to the options argument.
 
 You can also implement your own responder.
 
