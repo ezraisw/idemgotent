@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pwnedgod/idemgotent/internal/response"
-	"github.com/pwnedgod/wracha"
-	"github.com/pwnedgod/wracha/adapter"
-	"github.com/pwnedgod/wracha/codec/msgpack"
-	"github.com/pwnedgod/wracha/logger"
+	"github.com/ezraisw/idemgotent/internal/response"
+	"github.com/ezraisw/wracha"
+	"github.com/ezraisw/wracha/adapter"
+	"github.com/ezraisw/wracha/codec/msgpack"
+	"github.com/ezraisw/wracha/logger"
 )
 
 type (

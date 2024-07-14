@@ -2,14 +2,14 @@
 
 Middleware for providing idempotency for APIs.
 
-Uses [WraCha](https://github.com/pwnedgod/wracha) as its base. Safe for multi-threaded/multi-instance use.
+Uses [WraCha](https://github.com/ezraisw/wracha) as its base. Safe for multi-threaded/multi-instance use.
 
 ## Installation
 
 Simply run the following command to install:
 
 ```
-go get github.com/pwnedgod/idemgotent
+go get github.com/ezraisw/idemgotent
 ```
 
 ## Usage
@@ -23,9 +23,9 @@ import (
 
     "github.com/go-chi/chi"
     "github.com/go-redis/redis/v8"
-    "github.com/pwnedgod/idemgotent"
-    "github.com/pwnedgod/wracha/adapter/goredis"
-    "github.com/pwnedgod/wracha/logger/std"
+    "github.com/ezraisw/idemgotent"
+    "github.com/ezraisw/wracha/adapter/goredis"
+    "github.com/ezraisw/wracha/logger/std"
 )
 
 func main() {

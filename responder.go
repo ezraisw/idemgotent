@@ -3,7 +3,7 @@ package idemgotent
 import (
 	"net/http"
 
-	"github.com/pwnedgod/idemgotent/internal/util"
+	"github.com/ezraisw/idemgotent/internal/util"
 )
 
 type (

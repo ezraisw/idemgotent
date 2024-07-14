@@ -3,8 +3,8 @@ package idemgotent
 import (
 	"time"
 
-	"github.com/pwnedgod/wracha/adapter"
-	"github.com/pwnedgod/wracha/logger"
+	"github.com/ezraisw/wracha/adapter"
+	"github.com/ezraisw/wracha/logger"
 )
 
 type MiddlewareOption func(*idempotencyMiddleware)
